@@ -97,12 +97,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(Loader<List<Book>> loader) {
         bookAdapters.clear();
     }
-}
+
     /**
      * Loads a list of earthquakes by using an AsyncTaskLoader to perform the
      * network request to the given URL.
      */
-    public class BookLoader extends AsyncTaskLoader<List<Book>> {
+    public static class BookLoader extends AsyncTaskLoader<List<Book>> {
 
         /**
          * Tag for log messages
