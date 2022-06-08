@@ -22,12 +22,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final int BOOK_LOADER_ID = 1;
 
-    private static final String BOOK_DATA_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=1";
+    private static final String BOOK_DATA_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=20";
 
     private BookAdapter bookAdapters;
     private TextView emptyView;
     private ProgressBar progressbar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
