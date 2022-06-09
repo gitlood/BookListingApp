@@ -1,6 +1,9 @@
 package com.example.booklisting;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuItemCompat;
 
 import android.app.LoaderManager;
 import android.content.AsyncTaskLoader;
@@ -9,9 +12,13 @@ import android.content.Loader;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -22,18 +29,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final int BOOK_LOADER_ID = 1;
 
-    private static final String BOOK_DATA_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=20";
+    private static final String BASE_URL = "https://www.googleapis.com/books/v1/volumes?q=";
+
+    public String Url;
 
     private BookAdapter bookAdapters;
     private TextView emptyView;
     private ProgressBar progressbar;
+    private ListView bookListView;
+    LoaderManager loaderManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView bookListView = findViewById(R.id.list);
+        bookListView = findViewById(R.id.list);
         emptyView = findViewById(R.id.empty_view);
         progressbar = findViewById(R.id.progressbar);
 
@@ -41,47 +52,25 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         bookAdapters = new BookAdapter(this, new ArrayList<>());
 
-        bookListView.setAdapter(bookAdapters);
-
-        // Get a reference to the ConnectivityManager to check state of network connectivity
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        // Get details on the currently active default data network
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-
-        // If there is a network connection, fetch data
-        if (networkInfo != null && networkInfo.isConnected()) {
-            // Get a reference to the LoaderManager, in order to interact with loaders.
-            LoaderManager loaderManager = getLoaderManager();
-
-            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
-            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
-            // because this activity implements the LoaderCallbacks interface).
-            loaderManager.initLoader(BOOK_LOADER_ID, null, this);
-        } else {
-            // Otherwise, display error
-            // First, hide loading indicator so error message will be visible
-            progressbar.setVisibility(View.GONE);
-
-            // Update empty state with no connection error message
-            emptyView.setText(R.string.no_internet_connection);
-        }
+        // Get a reference to the LoaderManager, in order to interact with loaders.
+        loaderManager = getLoaderManager();
     }
 
     @Override
     public Loader<List<Book>> onCreateLoader(int i, Bundle bundle) {
         // Create a new loader for the given URL
-        return new BookLoader(this, BOOK_DATA_REQUEST_URL);
+        return new BookLoader(this, Url);
     }
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
         progressbar.setVisibility(View.GONE);
-        // Set empty state text to display "No earthquakes found."
+        // Set empty state text to display "No books found."
         emptyView.setText(R.string.no_books);
 
-        // Clear the adapter of previous earthquake data
+        bookListView.setAdapter(bookAdapters);
+
+        // Clear the adapter of previous book data
         bookAdapters.clear();
 
         if (books != null && !books.isEmpty()) {
@@ -90,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             bookAdapters.addAll(books);
             bookAdapters.notifyDataSetChanged();
         }
+        loaderManager.destroyLoader(1);
     }
 
     @Override
@@ -141,5 +131,62 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             // Perform the network request, parse the response, and extract a list of earthquakes.
             return Utils.fetchBookData(mUrl);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.search_menu, menu);
+
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                Log.d(TAG, "onQueryTextSubmit: called");
+                // Get a reference to the ConnectivityManager to check state of network connectivity
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+
+                // Get details on the currently active default data network
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+                // If there is a network connection, fetch data
+                if (networkInfo != null && networkInfo.isConnected()) {
+                    Log.d(TAG, "onQueryTextSubmit: internet is available");
+                    emptyView.setVisibility(View.INVISIBLE);
+                    progressbar.setVisibility(View.VISIBLE);
+                    Url = BASE_URL + query;
+                    System.out.println(Url);
+                    Log.d(TAG, "onQueryTextSubmit: " + Url);
+
+                    bookAdapters.clear();
+
+                    loaderManager.initLoader(1, null, MainActivity.this);
+
+                    //reset the search view
+                    searchView.setQuery("", false);
+                    searchView.setIconified(true);
+                    searchItem.collapseActionView();
+
+                    Url = "";
+
+                    //set The title of the activity to the search query
+                    MainActivity.this.setTitle(query);
+                } else {
+                    emptyView.setText(R.string.no_internet_connection);
+                    bookAdapters.clear();
+                    emptyView.setVisibility(View.VISIBLE);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return true;
     }
 }
