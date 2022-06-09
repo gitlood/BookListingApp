@@ -8,10 +8,10 @@ The goal is to design and create the structure of a Book Listing app which would
 To use what i learned about web and about how to get data from an api. Demonstrate how to parse data and display it to a user. This app which makes use of a backend server, real time data, or interactions over the internet.
 
 ## What will I learn?
-Fetching data from an API
-Using an AsyncTask
-Parsing a JSON response
-Creating a list based on that data and displaying it to the user.
+* Fetching data from an API
+* Using an AsyncTask
+* Parsing a JSON response
+* Creating a list based on that data and displaying it to the user.
 
 <table>
 <tr>
