@@ -23,7 +23,6 @@ public class Utils {
      * Query the Google API dataset and return an {@link Book} object to represent a single book.
      */
     public static ArrayList<Book> fetchBookData(String requestUrl) {
-        System.out.println(requestUrl);
         // Create URL object
         URL url = createUrl(requestUrl);
 
@@ -38,7 +37,6 @@ public class Utils {
         // Extract relevant fields from the JSON response and create an {@link Event} object
 
         // Return the {@link Event}
-        System.out.println(jsonResponse);
         return extractBooks(jsonResponse);
     }
 
@@ -84,7 +82,7 @@ public class Utils {
                 Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Problem retrieving the earthquake JSON results.", e);
+            Log.e(LOG_TAG, "Problem retrieving the book JSON results.", e);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -140,7 +138,6 @@ public class Utils {
             JSONArray jsonArray = json.getJSONArray("items");
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject volumeInfo = jsonArray.getJSONObject(i).getJSONObject("volumeInfo");
-                System.out.println(volumeInfo);
                 ArrayList<String> authors = new ArrayList<>();
                 for (int a = 0; a < volumeInfo.getJSONArray("authors").length(); a++) {
                     authors.add(volumeInfo.getJSONArray("authors").getString(a));
@@ -164,5 +161,4 @@ public class Utils {
         // Return the list of books
         return books;
     }
-
 }

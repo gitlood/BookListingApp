@@ -54,6 +54,29 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         // Get a reference to the LoaderManager, in order to interact with loaders.
         loaderManager = getLoaderManager();
+
+        // If there is a network connection, fetch data
+        if (checkOnlineStatus()) {
+            Log.d(TAG, "onQueryTextSubmit: internet is available");
+            emptyView.setVisibility(View.INVISIBLE);
+            progressbar.setVisibility(View.VISIBLE);
+            Url = BASE_URL + "android";
+            Log.d(TAG, "onQueryTextSubmit: " + Url);
+
+            bookAdapters.clear();
+
+            loaderManager.initLoader(1, null, MainActivity.this);
+
+            Url = "";
+
+            //set The title of the activity to the search query
+            MainActivity.this.setTitle("Android Books");
+        } else {
+            emptyView.setText(R.string.no_internet_connection);
+            bookAdapters.clear();
+            emptyView.setVisibility(View.VISIBLE);
+            progressbar.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -74,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         bookAdapters.clear();
 
         if (books != null && !books.isEmpty()) {
-            // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
+            // If there is a valid list of {@link Book}s, then add them to the adapter's
             // data set. This will trigger the ListView to update.
             bookAdapters.addAll(books);
             bookAdapters.notifyDataSetChanged();
@@ -88,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     /**
-     * Loads a list of earthquakes by using an AsyncTaskLoader to perform the
+     * Loads a list of books by using an AsyncTaskLoader to perform the
      * network request to the given URL.
      */
     public static class BookLoader extends AsyncTaskLoader<List<Book>> {
@@ -128,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 return null;
             }
 
-            // Perform the network request, parse the response, and extract a list of earthquakes.
+            // Perform the network request, parse the response, and extract a list of books.
             return Utils.fetchBookData(mUrl);
         }
     }
@@ -145,20 +168,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public boolean onQueryTextSubmit(String query) {
 
                 Log.d(TAG, "onQueryTextSubmit: called");
-                // Get a reference to the ConnectivityManager to check state of network connectivity
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-
-                // Get details on the currently active default data network
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
                 // If there is a network connection, fetch data
-                if (networkInfo != null && networkInfo.isConnected()) {
+                if (checkOnlineStatus()) {
                     Log.d(TAG, "onQueryTextSubmit: internet is available");
                     emptyView.setVisibility(View.INVISIBLE);
                     progressbar.setVisibility(View.VISIBLE);
                     Url = BASE_URL + query;
-                    System.out.println(Url);
                     Log.d(TAG, "onQueryTextSubmit: " + Url);
 
                     bookAdapters.clear();
@@ -188,5 +204,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
         return true;
+    }
+
+    public boolean checkOnlineStatus() {
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
     }
 }

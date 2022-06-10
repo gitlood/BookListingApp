@@ -1,6 +1,5 @@
 package com.example.booklisting;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -16,12 +15,10 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 /**
- * An {@link BookAdapter} knows how to create a list item layout for each earthquake
+ * An {@link BookAdapter} knows how to create a list item layout for each book
  * in the data source (a list of {@link Book} objects).
  * <p>
  * These list item layouts will be provided to an adapter view like ListView
@@ -32,16 +29,16 @@ public class BookAdapter extends ArrayAdapter<Book> {
     /**
      * Constructs a new {@link BookAdapter}.
      *
-     * @param context     of the app
-     * @param books is the list of books, which is the data source of the adapter
+     * @param context of the app
+     * @param books   is the list of books, which is the data source of the adapter
      */
     public BookAdapter(Context context, List<Book> books) {
         super(context, 0, books);
     }
 
     /**
-     * Returns a list item view that displays information about the earthquake at the given position
-     * in the list of earthquakes.
+     * Returns a list item view that displays information about the book at the given position
+     * in the list of books.
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -53,7 +50,7 @@ public class BookAdapter extends ArrayAdapter<Book> {
                     R.layout.book_list_item, parent, false);
         }
 
-        // Find the earthquake at the given position in the list of earthquakes
+        // Find the book at the given position in the list of books
         Book currentBook = getItem(position);
 
         LinearLayout container = listItemView.findViewById(R.id.container);
@@ -69,19 +66,24 @@ public class BookAdapter extends ArrayAdapter<Book> {
         description.setVisibility(View.GONE);
 
         container.setOnClickListener(view -> {
-            if(description.getVisibility() == View.GONE){
+            if (description.getVisibility() == View.GONE) {
                 description.setVisibility(View.VISIBLE);
-            }else{
+            } else {
                 description.setVisibility(View.GONE);
             }
         });
 
+        //converts picture into imageview with picasso library
         Picasso.get().load(currentBook.getThumbnailLink()).into(thumbnail);
+
         title.setText(currentBook.getTitle());
         author.setText(currentBook.formatAuthorsToString());
         publisher.setText(currentBook.getPublisher());
+
         String publisherDateString = "(" + currentBook.getPublisherDate() + ")";
         publisherDate.setText(publisherDateString);
+
+        //clickable textView to go to website about book
         link.setText(Html.fromHtml("<a href=currentBook.getLinkToPreview()>View Webpage</a>"));
         link.setMovementMethod(LinkMovementMethod.getInstance());
         link.setOnClickListener(v -> {
@@ -89,25 +91,10 @@ public class BookAdapter extends ArrayAdapter<Book> {
             browserIntent.setData(Uri.parse(currentBook.getLinkToPreview()));
             getContext().startActivity(browserIntent);
         });
+
         description.setText(currentBook.getDescription());
 
         // Return the list item view that is now showing the appropriate data
         return listItemView;
-    }
-
-        /**
-         * Return the formatted date string (i.e. "Mar 3, 1984") from a Date object.
-         */
-    private String formatDate(Date dateObject) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("LLL dd, yyyy");
-        return dateFormat.format(dateObject);
-    }
-
-    /**
-     * Return the formatted date string (i.e. "4:30 PM") from a Date object.
-     */
-    private String formatTime(Date dateObject) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
-        return timeFormat.format(dateObject);
     }
 }

@@ -4,13 +4,13 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Book {
-private String title;
-private ArrayList<String> authors;
-private String publisher;
-private String publisherDate;
-private String description;
-private String thumbnailLink;
-private String linkToPreview;
+    private String title;
+    private ArrayList<String> authors;
+    private String publisher;
+    private String publisherDate;
+    private String description;
+    private String thumbnailLink;
+    private String linkToPreview;
 
     public Book(String title, ArrayList<String> authors, String publisher, String publisherDate, String description, String thumbnailLink, String linkToPreview) {
         this.title = title;
@@ -38,11 +38,12 @@ private String linkToPreview;
         this.authors = authors;
     }
 
-    public String formatAuthorsToString(){
+    //format author arrays to easily readable string
+    public String formatAuthorsToString() {
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < authors.size(); i++){
+        for (int i = 0; i < authors.size(); i++) {
             sb.append(authors.get(i));
-            if(i != authors.size()-1){
+            if (i != authors.size() - 1) {
                 sb.append(", ");
             }
         }
